@@ -23,21 +23,21 @@ const cleanJSON = (jsonString: string): string => {
 const detectJSONErrors = (jsonString: string): string[] => {
     const errors: string[] = [];
 
-    // Check for unquoted keys
-    const unquotedKeyRegex = /{\s*(\w+)\s*:/g;
+    // Check for unquoted keys (Fix the regex to capture more cases)
+    const unquotedKeyRegex = /([{\s,])(\w+)\s*:/g;
     let match;
     while ((match = unquotedKeyRegex.exec(jsonString)) !== null) {
-        errors.push(`Unquoted key: "${match[1]}"`);
+        errors.push(`Unquoted key: "${match[2]}"`);
     }
 
     // Check for missing commas
-    const missingCommaRegex = /("[^"]*"\s*:\s*("[^"]*"|[\d.]+|true|false|null))\s+"/g;
+    const missingCommaRegex = /("[^"]*"\s*:\s*("[^"]*"|[\d.]+|true|false|null))\s*("[^"]*")/g;
     if (missingCommaRegex.test(jsonString)) {
         errors.push("Missing comma between properties");
     }
 
     // Check for trailing commas
-    const trailingCommaRegex = /,\s*[}\]]/g;
+    const trailingCommaRegex = /,\s*([}\]])/g;
     if (trailingCommaRegex.test(jsonString)) {
         errors.push("Trailing comma");
     }
