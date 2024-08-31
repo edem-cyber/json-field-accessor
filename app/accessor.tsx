@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast, Toaster } from 'sonner';
-import { List, Type, Hash, BarChart2 } from 'lucide-react';
+import { List, Type, Hash, BarChart2, CheckSquare } from 'lucide-react';
 
 const languages = [
     { value: 'javascript', label: 'JavaScript' },
@@ -97,6 +97,7 @@ const JSONFieldAccessor: React.FC = () => {
 
     useEffect(() => {
         if (jsonInput) {
+            updateAccessors(jsonInput);
             const errors = detectJSONErrors(jsonInput);
             setHasErrors(errors.length > 0);
             if (errors.length > 0) {
@@ -148,24 +149,41 @@ const JSONFieldAccessor: React.FC = () => {
 
     const handleLanguageChange = (value: string) => {
         setLanguage(value);
-        updateAccessors(jsonInput);
+
+        // Ensure that accessors are updated based on the current JSON input and new language
+        if (jsonInput.trim()) {
+            try {
+                const parsed = JSON.parse(jsonInput);
+                setAccessors(generateAccessors(parsed, '', value));
+            } catch (e) {
+                setAccessors([]);
+            }
+        } else {
+            setAccessors([]);
+        }
+
         toast.success(`Switched to ${value === 'javascript' ? 'JavaScript' : 'Dart'} accessors`);
     };
+
 
     const getIcon = (type: string) => {
         switch (type) {
             case 'array':
-                return <List className="inline-block mr-2" size={18} />;
+                return <List className="inline-block mr-2 text-blue-500" size={22} />;
             case 'object':
-                return <Hash className="inline-block mr-2" size={18} />;
+                return <Hash className="inline-block mr-2 text-green-500" size={22} />;
             case 'string':
-                return <Type className="inline-block mr-2" size={18} />;
+                return <Type className="inline-block mr-2 text-red-500" size={22} />;
             case 'number':
-                return <BarChart2 className="inline-block mr-2" size={18} />;
+                return <BarChart2 className="inline-block mr-2 text-yellow-500" size={22} />;
+            case 'boolean':
+                return <CheckSquare className="inline-block mr-2 text-purple-500" size={22} />;
+
             default:
                 return null;
         }
     };
+
 
     return (
         <div className="container mx-auto p-4">
